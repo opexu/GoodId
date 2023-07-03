@@ -18,11 +18,8 @@ contract LoveNFT is ERC721, ERC721URIStorage, ERC721Burnable, ERC721Royalty, Own
 
   event RoyaltyUpdated(uint96 newValue, uint256 tokenId);
 
-  constructor( address _owner ) ERC721(_name, _symbol) {
-    require(_royaltyFee <= MAXIMUM_ROYALTY_FEE, 'cant more than 20 percent');
-    _setDefaultRoyalty(_royaltyRecipient, _royaltyFee);
+  constructor( address _owner ) ERC721('GoodID', 'IdToken') {
     transferOwnership(_owner);
-    _contractURI = _contractUri;
   }
 
   function safeMint(address to, string memory uri) public onlyOwner {
@@ -90,7 +87,7 @@ contract LoveNFT is ERC721, ERC721URIStorage, ERC721Burnable, ERC721Royalty, Own
     return _contractURI;
   }
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, ERC721Royalty) returns (bool) {
+  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, ERC721Royalty, ERC721URIStorage) returns (bool) {
     return super.supportsInterface(interfaceId);
   }
 }
