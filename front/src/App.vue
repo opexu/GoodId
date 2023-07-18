@@ -3,28 +3,14 @@
     
     <Header></Header>
 
-    <Transition name="fade">
-    <div class="w-full h-fit flex flex-col justify-start items-center space-y-4"
+    <Transition name="fade" mode="out-in">
+    <Info
     v-if="tabStore.activeTab === Tab.Info"
-    >
-        <InfoBlock1/>
-        <InfoBlock2/>
-        <InfoBlock3/>
-        <InfoBlock4/>
-    </div>
-
-    <div class="w-full h-fit flex flex-col justify-start items-center space-y-4"
+    />
+    <Production
     v-else-if="tabStore.activeTab === Tab.Production"
-    >
-        <ProdBlock1/>
-        <Production/>
-    </div>
-    
-    <div class="w-full h-fit flex flex-col justify-start items-center space-y-4"
-    v-else
-    >
-        <Consumer/>
-    </div>
+    />
+    <Consumer v-else />
     </Transition>
 </div>
 </template>
@@ -32,19 +18,16 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import Header from '@/components/Header.vue'
-import InfoBlock1 from '@/components/info/InfoBlock1.vue'
-import InfoBlock2 from '@/components/info/InfoBlock2.vue'
-import InfoBlock3 from '@/components/info/InfoBlock3.vue'
-import InfoBlock4 from '@/components/info/InfoBlock4.vue'
-import Production from '@/components/production/Production.vue';
-import ProdBlock1 from '@/components/production/ProdBlock1.vue';
+import Info from '@/components/info/Info.vue'
 import Consumer from '@/components/consumer/Consumer.vue';
+import Production from '@/components/production/Production.vue';
 import { Tab, useTabStore } from '@/store/tabStore';
+import { useMetaMask } from './store/MetaMaskStore';
 
 const tabStore = useTabStore();
 
 onMounted(()=>{
-    console.log('MOUNTD')
+    useMetaMask().init();
 })
 </script>
 

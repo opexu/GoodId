@@ -4,7 +4,7 @@
     <div class="w-full h-fit flex flex-col justify-center items-start space-y-2">
         <label for="item-name" class="font-bold">Название</label>
         <input id="item-name" class="w-full h-fit p-4 border rounded-md focus:bg-blue-50"
-        placeholder="Сотовый телефон"
+        :placeholder="placeholder1"
         v-model="itemName"
         />
     </div>
@@ -12,7 +12,7 @@
     <div class="w-full h-fit flex flex-col justify-center items-star space-y-2">
         <label for="item-name" class="font-bold">Описание</label>
         <input id="item-name" class="w-full h-fit p-4 border rounded-md focus:bg-blue-50"
-        placeholder="Средство связи"
+        :placeholder="placeholder2"
         v-model="itemDescription"
         />
     </div>
@@ -20,8 +20,11 @@
     <div class="w-full h-fit flex flex-col space-y-4">
         <p class="font-bold">Аттрибуты</p>
         <Field
-        v-for="( id, i ) in idArr" :key="i"
-        :id="id"
+        v-for="( field ) in fieldArr" :key="field.id"
+        :id="field.id"
+        :error="field.error"
+        @set-field="onSetField"
+        @remove-field="onRemoveField"
         />
         <button class="w-full h-fit p-4 border rounded-md flex flex-row justify-center items-center hover:bg-blue-100 active:bg-blue-200"
         @click="onAddField"
@@ -31,22 +34,63 @@
             </svg>
         </button>
     </div>
+
+    <button class="w-full h-fit mt-4 px-6 py-4 border rounded-md [&:not([disabled])]hover:border-orange-700 [&:not([disabled])]hover:text-orange-700 disabled:border-slate-300 disabled:text-slate-300"
+    @click="onApplyNewCollection"
+    :disabled="IsDisabled"
+    >{{buttonText}}</button>
 </div>
 </template>
 
 <script setup lang="ts">
 import Field from './Field.vue';
-import { ref } from 'vue';
+import type { IField } from '@/components/interfaces/common';
+import { computed, ref } from 'vue';
 
-
+defineProps({
+    placeholder1: String,
+    placeholder2: String,
+    buttonText: String,
+})
 const itemName = ref('')
 const itemDescription = ref('')
 
-const idArr = ref<number[]>([]);
+const count = ref(0);
+const fieldArr = ref<IField[]>([]);
 function onAddField(){
-    idArr.value.push( idArr.value.length )
+    fieldArr.value.push({
+        id: count.value,
+        key: '',
+        value: '',
+        error: true,
+    })
+    count.value += 1;
+    console.log('fieldArr: ', fieldArr.value)
 }
-function removeField(){
+function onRemoveField( id: number ){
+    const index = fieldArr.value.findIndex( f => f.id === id );
+    fieldArr.value.splice( index, 1 );
+}
+function onSetField( field: Omit<IField, 'error'> ){
+    const index = fieldArr.value.findIndex( f => f.id === field.id );
+    const errorFields = fieldArr.value.filter( f => f.key === field.key && f.id !== field.id );
+    const error = errorFields.length > 0 ? true : false;
+    fieldArr.value.splice( index, 1, { error, ...field });
+}
+
+const IsDisabled = computed(()=>{
+    if( !itemName.value ) return true;
+    if( !itemDescription.value ) return true;
+    let result = false;
+    for( let i = 0; i < fieldArr.value.length; i++ ){
+        if( !fieldArr.value[i].key || !fieldArr.value[i].value ) {
+            result = true;
+            break;
+        }
+    }
+    return result;
+})
+function onApplyNewCollection(){
 
 }
 </script>

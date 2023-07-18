@@ -13,7 +13,10 @@ export default defineConfig({
     base: ((process.env.GITHUB_REPOSITORY ?? "") + "/").match(/(\/.*)/)?.[1],
     server: {
         port: 3000,
-        hot: true
+        hot: true,
+        watch: {
+            usePolling: true,
+        }
     },
     resolve: {
         alias: {

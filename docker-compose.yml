@@ -1,0 +1,108 @@
+version: '3'
+
+services:
+  
+  front:
+    container_name: goodid-front
+    restart: unless-stopped
+    build:
+      dockerfile: ./Dockerfile
+      context: ./front
+    env_file: .env
+    volumes:
+     - ./front/src:/usr/src/app/src
+    networks:
+      - default
+    logging:
+        options:
+          max-size: '50m'
+
+  back:
+    container_name: goodid-back
+    restart: unless-stopped
+    build:
+      context: ./back
+    ports:
+      - 1337:1337
+    env_file:
+    - .env
+    environment:
+      POSTGRES_HOST: ${PG_HOST}
+      POSTGRES_PORT: ${PG_PORT}
+      POSTGRES_DATABASE: ${PG_DATABASE}
+      POSTGRES_USER: ${PG_USERNAME}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+    volumes:
+      - ./back/src:/usr/src/app/src
+    depends_on:
+      - postgres
+    networks:
+      - default
+    logging:
+        options:
+          max-size: '50m'
+
+  nginx:
+    image: nginx:latest
+    container_name: goodid-nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - default
+    depends_on:
+      - front
+      - back
+    logging:
+        options:
+          max-size: '50m'
+  
+  postgres:
+    image: postgres:14.2-alpine
+    container_name: goodid-postgres
+    restart: unless-stopped
+    shm_size: 64m
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: ${PG_DATABASE}
+      POSTGRES_USER: ${PG_USERNAME}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+    env_file:
+      - .env
+    volumes:
+      - ./docker/data/postgres:/var/lib/postgresql/data
+    networks:
+      - default
+    logging:
+        options:
+          max-size: '50m'
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: goodid-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    volumes:
+      - ./docker/data/pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - default
+    depends_on:
+      - postgres
+    logging:
+        options:
+          max-size: '50m'
+
+networks:
+  default:
+    name: goodid
+
