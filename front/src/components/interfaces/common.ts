@@ -1,3 +1,12 @@
+type IObjectIterable = { [key:string]:string }
+
+interface ICollectionParams {
+    name: string;
+    description: string;
+    attributes: IObjectIterable;
+}
+
+
 interface IField {
     id: number;
     key: string;
@@ -6,5 +15,7 @@ interface IField {
 }
 
 export type {
+    IObjectIterable,
+    ICollectionParams,
     IField
 }

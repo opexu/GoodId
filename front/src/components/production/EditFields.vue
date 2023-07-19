@@ -44,7 +44,8 @@
 
 <script setup lang="ts">
 import Field from './Field.vue';
-import type { IField } from '@/components/interfaces/common';
+import type { IObjectIterable, IField, ICollectionParams } from '@/components/interfaces/common';
+import { useMetaMask } from '@/store/MetaMaskStore';
 import { computed, ref } from 'vue';
 
 defineProps({
@@ -91,6 +92,17 @@ const IsDisabled = computed(()=>{
     return result;
 })
 function onApplyNewCollection(){
-
+    const params: ICollectionParams = {
+        name: itemName.value,
+        description: itemDescription.value,
+        attributes: (() => {
+            const object: IObjectIterable = {};
+            for( let i = 0; i < fieldArr.value.length; i++ ){
+                object[fieldArr.value[i].key] = fieldArr.value[i].value
+            }
+            return object;
+        })()
+    }
+    useMetaMask().onApplyCollection( params )
 }
 </script>
