@@ -6,6 +6,7 @@ import '@nomiclabs/hardhat-ethers';
 import 'hardhat-deploy';
 import { HardhatUserConfig } from 'hardhat/config';
 
+import './tasks';
 dotenv.config();
 
 const config: HardhatUserConfig = {
@@ -40,10 +41,12 @@ const config: HardhatUserConfig = {
       },
     },
     siberium: {
-      url: 'https://rpc.test.siberium.net',
+      url: 'https://rpc.test.siberium.net', //'https://siberium-test-network.rpc.thirdweb.com',
       accounts: {
         mnemonic: process.env.MNEMONIC,
       },
+      gas: 6721975,
+      gasPrice: 20000000000,
     },
   },
   gasReporter: {
@@ -52,11 +55,20 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
+    customChains: [
+      {
+        network: "siberium",
+        chainId: 111000,
+        urls: {
+          apiURL: "https://rpc.test.siberium.net",
+          browserURL: "https://rpc.test.siberium.net"
+        }
+      }
+    ]
   },
   typechain: {
     outDir: 'typechain-types',
     target: 'ethers-v5',
-    alwaysGenerateOverloads: true,
   },
 };
 

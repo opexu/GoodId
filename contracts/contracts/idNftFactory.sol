@@ -8,7 +8,7 @@ contract idNftFactory {
 
   event CreatedNFTCollection(address creator, address nft, string name, string symbol, string properties);
 
-  function createIdNft(
+  function createIdNftCollection(
     string memory _name,
     string memory _symbol,
     string memory _propertiesURL

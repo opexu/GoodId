@@ -21,8 +21,6 @@ contract idNft is
 
     string private _contractURI;
 
-    event RoyaltyUpdated(uint96 newValue, uint256 tokenId);
-
     constructor(
         string memory _name,
         string memory _symbol,
@@ -35,14 +33,22 @@ contract idNft is
 
     function safeMint(address to, string memory uri) public onlyOwner {
         uint256 tokenId = _currentIndex;
-        require(
-            _currentIndex <= TOKEN_ID,
-            "can be only one token for each idNft"
-        );
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
         _currentIndex++;
     }
+
+    function bulkMint(address to, string[] calldata URIs) public onlyOwner {
+    require(URIs.length > 0, 'URIs length must be greater than 0');
+    uint256 tokenId = _currentIndex;
+
+    for (uint256 i = 0; i < URIs.length; i++) {
+      _safeMint(to, tokenId);
+      _setTokenURI(tokenId, URIs[i]);
+      tokenId++;
+    }
+    _currentIndex = tokenId;
+  }
 
     function totalSupply() public view returns (uint256) {
         return _currentIndex - _burnCounter;

@@ -1,0 +1,16 @@
+import { DeployFunction } from 'hardhat-deploy/types';
+
+const func: DeployFunction = async function (hre) {
+  const signers = await hre.ethers.getSigners();
+  const { deploy } = hre.deployments;
+  await deploy('idNftFactory', {
+    contract: 'idNftFactory',
+    from: signers[0].address,
+    log: true,
+    gas: 6721975,
+    gasPrice: 20000000000,
+  });
+  console.log('deployed factory');
+};
+export default func;
+func.tags = ['idNftFactory', 'test'];
