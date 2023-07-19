@@ -6,4 +6,4 @@ assets
 #Hardhat files
 cache
 artifacts
-typechain-types
+# typechain-types
