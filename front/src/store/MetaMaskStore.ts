@@ -73,18 +73,37 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
     }
 
     async function onApplyCollection( params: ICollectionParams ){
+        // TODO database save
         console.log('params', params)
-        const factory = IdNftFactory__factory.connect( ID_NFT_FACTORY, siberium.value );
-        console.log('siberium.value', siberium.value)
+        console.log('siberium', siberium)
         const signer = await siberium.getSigner();
         console.log('signer', signer)
+        const factory = IdNftFactory__factory.connect( ID_NFT_FACTORY, signer );
+
         try{
             const txHash = await factory.connect( signer ).createIdNftCollection(
                 params.name,
                 params.description,
-                JSON.stringify( params.attributes )
+                'ссылка_на_объект_пропертиес'
             )
             console.log('txHash: ', txHash)
+            const receipt = await txHash.wait();
+            console.log('receipt: ', receipt)
+            const collectionAddress = receipt.events[0].address;
+            console.log('collectionAddress', collectionAddress)
+
+            const nft = IdNft__factory.connect( collectionAddress, signer )
+            console.log('nft: ', nft)
+            const txMint = await nft.connect( signer ).safeMint(
+                accounts[0],
+                'ссылка_на_объект_пропертиес',
+            )
+            console.log('txMint', txMint)
+            const nftReceipt = await txMint.wait();
+            console.log('nftReceipt', nftReceipt)
+            const properties = await nft.connect( signer ).tokenURI( nftReceipt.events[0].args.tokenId )
+            console.log('properties', properties)
+            // useProductionStore().next();
         }catch(e){
             console.error('ERROR', e)
         }
