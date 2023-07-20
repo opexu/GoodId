@@ -2,18 +2,19 @@
 pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
 contract idNftMarket {
     uint256 private _saleOrderIndex = 0;
-
+    uint256 public fixedPlatformFee = 0.1 ether;
     struct saleOrderParams {
         address nftAddress;
         uint256 tokenId;
         uint256 price;
         address buyer;
-        uint256 endTime;
     }
 
     struct saleOrder {
@@ -23,7 +24,6 @@ contract idNftMarket {
         uint256 price;
         address buyer;
         address seller;
-        uint256 endTime;
     }
     event CreatedSaleOrder(
         uint256 id,
@@ -31,8 +31,7 @@ contract idNftMarket {
         uint256 tokenId,
         uint256 price,
         address buyer,
-        address seller,
-        uint256 endTime
+        address seller
     );
 
     event BoughtItem(
@@ -56,10 +55,11 @@ contract idNftMarket {
 
     function createSaleOrder(
         saleOrderParams calldata params
-    ) external returns (uint256) {
-        if (params.endTime > 0)
-            require(block.timestamp <= params.endTime, "invalid time range");
-
+    ) public payable returns (uint256) {
+        require(
+            msg.value == fixedPlatformFee,
+            "platform fee is 0.1"
+        );
         IERC721 idNftContract = IERC721(params.nftAddress);
 
         require(
@@ -74,8 +74,7 @@ contract idNftMarket {
             tokenId: params.tokenId,
             price: params.price,
             seller: msg.sender,
-            buyer: params.buyer,
-            endTime: params.endTime
+            buyer: params.buyer
         });
 
         _saleOrderIndex++;
@@ -85,28 +84,27 @@ contract idNftMarket {
             params.tokenId,
             params.price,
             msg.sender,
-            params.buyer,
-            params.endTime
+            params.buyer
         );
         return currentId;
     }
 
-    function buy(uint256 orderId) external {
+    function buy(uint256 orderId) public payable {
         saleOrder memory order = saleOrders[orderId];
 
         require(order.buyer == msg.sender, "incorrect buyer");
-        require(order.price < payable(msg.sender).balance, "low balance");
-        payable(msg.sender).transfer(order.price);
-        address nftAddress = saleOrders[orderId].nftAddress;
-        uint256 tokenId = saleOrders[orderId].tokenId;
+        require(order.price < msg.value, "low balance");
+        address nftAddress = order.nftAddress;
+        uint256 tokenId = order.tokenId;
+        address seller = order.seller;
         delete saleOrders[orderId];
+        payable(seller).transfer(order.price);
 
         IERC721(nftAddress).safeTransferFrom(
             address(this),
             msg.sender,
             tokenId
         );
-
         emit BoughtItem(
             nftAddress,
             tokenId,
