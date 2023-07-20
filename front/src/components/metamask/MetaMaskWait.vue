@@ -4,7 +4,7 @@
         <MetaMaskLogo/>
     </div>
     <div class="w-full h-fit flex flex-col justify">
-        <p class="w-full h-fit mb-4 text-[3rem] font-bold">Упс... Что пошло не так</p>
+        <p class="w-full h-fit mb-4 text-[3rem] font-bold">Транзакция</p>
         <p class="w-full h-fit mt-4 text-[2rem] font-bold">{{title}}</p>
         <p class="w-full h-fit mt-4 text-gray-500 text-[1rem]">{{message}}</p>
     </div>

@@ -17,7 +17,7 @@
     <div class="w-full h-full grow"></div>
 
     <div class="w-fit-h-fit rounded-full px-4 py-4 flex flex-row justify-center items-center space-x-4 bg-blue-700">
-        <p class="text-white font-bold">Информация</p>
+        <!-- <p class="text-white font-bold">Информация</p> -->
         <button class="w-fit h-fit px-6 py-4 border-2 rounded-full flex flex-row justify-center items-center bg-white hover:bg-orange-100 focus:border-orange-500 focus:text-orange-600"
         @click="onProductionClick"
         >Производителям</button>

@@ -13,6 +13,8 @@ services:
      - ./front/src:/usr/src/app/src
     networks:
       - default
+    depends_on:
+      - back
     logging:
         options:
           max-size: '50m'

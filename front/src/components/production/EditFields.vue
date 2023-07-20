@@ -45,9 +45,9 @@
 <script setup lang="ts">
 import Field from './Field.vue';
 import type { IObjectIterable, IField, ICollectionParams } from '@/components/interfaces/common';
-import { useMetaMask } from '@/store/MetaMaskStore';
 import { computed, ref } from 'vue';
 
+const emit = defineEmits(['create-collection'])
 defineProps({
     placeholder1: String,
     placeholder2: String,
@@ -103,6 +103,6 @@ function onApplyNewCollection(){
             return object;
         })()
     }
-    useMetaMask().onApplyCollection( params )
+    emit('create-collection', params)
 }
 </script>
