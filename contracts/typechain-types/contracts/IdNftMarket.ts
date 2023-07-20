@@ -9,6 +9,7 @@ import type {
   CallOverrides,
   ContractTransaction,
   Overrides,
+  PayableOverrides,
   PopulatedTransaction,
   Signer,
   utils,
@@ -32,21 +33,18 @@ export declare namespace IdNftMarket {
     tokenId: BigNumberish;
     price: BigNumberish;
     buyer: string;
-    endTime: BigNumberish;
   };
 
   export type SaleOrderParamsStructOutput = [
     string,
     BigNumber,
     BigNumber,
-    string,
-    BigNumber
+    string
   ] & {
     nftAddress: string;
     tokenId: BigNumber;
     price: BigNumber;
     buyer: string;
-    endTime: BigNumber;
   };
 }
 
@@ -54,11 +52,16 @@ export interface IdNftMarketInterface extends utils.Interface {
   functions: {
     "buy(uint256)": FunctionFragment;
     "cancelSaleOrder(uint256)": FunctionFragment;
-    "createSaleOrder((address,uint256,uint256,address,uint256))": FunctionFragment;
+    "createSaleOrder((address,uint256,uint256,address))": FunctionFragment;
+    "fixedPlatformFee()": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic: "buy" | "cancelSaleOrder" | "createSaleOrder"
+    nameOrSignatureOrTopic:
+      | "buy"
+      | "cancelSaleOrder"
+      | "createSaleOrder"
+      | "fixedPlatformFee"
   ): FunctionFragment;
 
   encodeFunctionData(functionFragment: "buy", values: [BigNumberish]): string;
@@ -70,6 +73,10 @@ export interface IdNftMarketInterface extends utils.Interface {
     functionFragment: "createSaleOrder",
     values: [IdNftMarket.SaleOrderParamsStruct]
   ): string;
+  encodeFunctionData(
+    functionFragment: "fixedPlatformFee",
+    values?: undefined
+  ): string;
 
   decodeFunctionResult(functionFragment: "buy", data: BytesLike): Result;
   decodeFunctionResult(
@@ -80,11 +87,15 @@ export interface IdNftMarketInterface extends utils.Interface {
     functionFragment: "createSaleOrder",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "fixedPlatformFee",
+    data: BytesLike
+  ): Result;
 
   events: {
     "BoughtItem(address,uint256,uint256,address,address)": EventFragment;
     "CanceledSaleOrder(uint256,address,uint256,uint256,address,address)": EventFragment;
-    "CreatedSaleOrder(uint256,address,uint256,uint256,address,address,uint256)": EventFragment;
+    "CreatedSaleOrder(uint256,address,uint256,uint256,address,address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "BoughtItem"): EventFragment;
@@ -129,10 +140,9 @@ export interface CreatedSaleOrderEventObject {
   price: BigNumber;
   buyer: string;
   seller: string;
-  endTime: BigNumber;
 }
 export type CreatedSaleOrderEvent = TypedEvent<
-  [BigNumber, string, BigNumber, BigNumber, string, string, BigNumber],
+  [BigNumber, string, BigNumber, BigNumber, string, string],
   CreatedSaleOrderEventObject
 >;
 
@@ -168,7 +178,7 @@ export interface IdNftMarket extends BaseContract {
   functions: {
     buy(
       orderId: BigNumberish,
-      overrides?: Overrides & { from?: string }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     cancelSaleOrder(
@@ -178,13 +188,15 @@ export interface IdNftMarket extends BaseContract {
 
     createSaleOrder(
       params: IdNftMarket.SaleOrderParamsStruct,
-      overrides?: Overrides & { from?: string }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
+
+    fixedPlatformFee(overrides?: CallOverrides): Promise<[BigNumber]>;
   };
 
   buy(
     orderId: BigNumberish,
-    overrides?: Overrides & { from?: string }
+    overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   cancelSaleOrder(
@@ -194,8 +206,10 @@ export interface IdNftMarket extends BaseContract {
 
   createSaleOrder(
     params: IdNftMarket.SaleOrderParamsStruct,
-    overrides?: Overrides & { from?: string }
+    overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
+
+  fixedPlatformFee(overrides?: CallOverrides): Promise<BigNumber>;
 
   callStatic: {
     buy(orderId: BigNumberish, overrides?: CallOverrides): Promise<void>;
@@ -209,6 +223,8 @@ export interface IdNftMarket extends BaseContract {
       params: IdNftMarket.SaleOrderParamsStruct,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    fixedPlatformFee(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   filters: {
@@ -244,14 +260,13 @@ export interface IdNftMarket extends BaseContract {
       seller?: null
     ): CanceledSaleOrderEventFilter;
 
-    "CreatedSaleOrder(uint256,address,uint256,uint256,address,address,uint256)"(
+    "CreatedSaleOrder(uint256,address,uint256,uint256,address,address)"(
       id?: null,
       nftAddress?: null,
       tokenId?: null,
       price?: null,
       buyer?: null,
-      seller?: null,
-      endTime?: null
+      seller?: null
     ): CreatedSaleOrderEventFilter;
     CreatedSaleOrder(
       id?: null,
@@ -259,15 +274,14 @@ export interface IdNftMarket extends BaseContract {
       tokenId?: null,
       price?: null,
       buyer?: null,
-      seller?: null,
-      endTime?: null
+      seller?: null
     ): CreatedSaleOrderEventFilter;
   };
 
   estimateGas: {
     buy(
       orderId: BigNumberish,
-      overrides?: Overrides & { from?: string }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
     cancelSaleOrder(
@@ -277,14 +291,16 @@ export interface IdNftMarket extends BaseContract {
 
     createSaleOrder(
       params: IdNftMarket.SaleOrderParamsStruct,
-      overrides?: Overrides & { from?: string }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
+
+    fixedPlatformFee(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
     buy(
       orderId: BigNumberish,
-      overrides?: Overrides & { from?: string }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     cancelSaleOrder(
@@ -294,7 +310,9 @@ export interface IdNftMarket extends BaseContract {
 
     createSaleOrder(
       params: IdNftMarket.SaleOrderParamsStruct,
-      overrides?: Overrides & { from?: string }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
+
+    fixedPlatformFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }
