@@ -6,7 +6,6 @@ import type { ICollectionDto, ICollectionParams, ITokenDto } from "@/components/
 import { BigNumber, ethers } from 'ethers'
 import { type IdNft, IdNft__factory, type IdNftFactory, IdNftFactory__factory, type IdNftMarket, IdNftMarket__factory } from '@/typechain-types';
 import { API } from "@/back_api/API";
-import { State, useState } from "./StateStore";
 
 const ID_NFT_FACTORY = '0x6542AF3782Bc1c92Fb5611087ABE3fF169872Dff';
 const ID_NFT_MARKET = '0xE6168c50a4092784eBD19063842aDfb38473F5Ac';
@@ -20,7 +19,7 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
     });
 
     let siberium: any = null;
-    let accounts: any = null;
+    const accounts: any = ref();
     // const siberium = MMSDK.getProvider();
     // siberium.request({ method: 'eth_requestAccounts', params: [] });
 
@@ -32,40 +31,31 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
         if( !siberium ){
             console.warn('Отсутствует провайдер')
         }
-        // siberium = await detectEthereumProvider();
-        // if ( siberium ) {
-        //     // const newAccounts = await siberium.request({
-        //     //     method: 'eth_accounts',
-        //     // })
-        //     // if( newAccounts.length > 0 ){
-        //     //     accounts = newAccounts;
-        //     // }else{
-        //     //     console.warn('user disconnected')
-        //     // }
-        //     console.log('siberium: ', siberium)
-        // }else{
-        //     console.log('Please install MetaMask!');
-        // }
     }
 
     const IsAvailable = computed(()=>{
         return siberium.provider ? siberium.provider.isMetaMask : false;
     })
 
-    async function connect(){
+    const IsConnected = ref(false);
+    async function connect(): Promise<boolean>{
         if( !siberium ) {
             console.warn('siberium undefined')
-            return;
+            IsConnected.value = false;
+            return false;
         }
 
-        accounts = await siberium.provider.request({
+        accounts.value = await siberium.provider.request({
             method: 'eth_requestAccounts',
         })
-        console.log('accounts: ', accounts)
-        if( accounts && accounts.length > 0 ){
-            useProductionStore().next();
+        console.log('accounts: ', accounts.value)
+        if( accounts && accounts.value.length > 0 ){
+            IsConnected.value = true;
+            return true;
         }else{
             console.warn('Ошибка получения адресов')
+            IsConnected.value = false;
+            return false;
         }
     }
 
@@ -97,7 +87,7 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
             const nft = IdNft__factory.connect( contractAddress.value, signer )
             console.log('nft: ', nft)
             const txMint = await nft.connect( signer ).safeMint(
-                accounts[0],
+                accounts.value[0],
                 'ссылка_на_объект_пропертиес',
             )
             console.log('txMint', txMint)
@@ -117,7 +107,7 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
 
         const collectionDto: ICollectionDto = {
             name: params.name,
-            ownerAddress: accounts[0]
+            ownerAddress: accounts.value[0]
         }
         if( params.description ) collectionDto.description = params.description;
         if( params.attributes ) collectionDto.properties = params.attributes;
@@ -168,7 +158,7 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
         const tokenDto: ITokenDto = {
             name: params.name,
             contractAddress: contractAddress.value,
-            ownerAddress: accounts[0]
+            ownerAddress: accounts.value[0]
         }
 
         if( params.description ) tokenDto.description = params.description;
@@ -189,7 +179,7 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
             const signer = await siberium.getSigner();
             const nft = IdNft__factory.connect( contractAddress.value, signer )
             const txMint = await nft.connect( signer ).safeMint(
-                accounts[0],
+                accounts.value[0],
                 tokenUri.value,
             )
             const nftReceipt = await txMint.wait();
@@ -212,9 +202,14 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
         
     }
 
+    async function onCreateSaleOrder( buyerAddress: string, tokenId: number, price: number ){
+
+    }
+
     return { 
         init, 
         IsAvailable, 
+        IsConnected,
         siberium, 
         accounts,
         contractAddress,
@@ -225,5 +220,6 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
         SetContractAddress,
         onCreateCollection,
         onCreateToken,
+        onCreateSaleOrder,
     }
 })

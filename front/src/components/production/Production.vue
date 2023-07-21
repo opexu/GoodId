@@ -1,13 +1,17 @@
 <template>
 <div class="w-full h-fit">
-    <div v-if="MetaMaskStore.IsAvailable" class="w-full h-fit flex flex-col justify-start items-center space-y-4">
+    <div class="w-full h-fit flex flex-col justify-start items-center space-y-4"
+    v-if="MetaMaskStore.IsAvailable" 
+    >
         <Transition name="fade" mode="out-in">
         <div class="w-full h-fit py-8 rounded-3xl flex flex-col justify-start items-center">
             <p class="w-full h-fit mt-4 items-center text-[2rem] font-bold">Пошаговая регистрация продукта</p>
         </div>
         </Transition>
+        
         <Transition name="fade" mode="out-in">
         <component :is="stepComponents[ProductionStore.step]"
+        @metamask-connected="onMetaMaskConnected"
         v-if="state === State.OK"
         />
         <MetaMaskWait
@@ -60,9 +64,9 @@ const stepComponents = [
     MetaMaskSuccessfull
 ]
 
-onMounted(() => {
-
-})
+function onMetaMaskConnected(){
+    useProductionStore().next();
+}
 </script>
 
 <style scoped>

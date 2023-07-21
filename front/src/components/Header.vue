@@ -1,7 +1,7 @@
 <template>
 <div class="w-full h-fit flex flex-row justify-center items-center space-x-4">
     <button class="group w-fit h-fit flex flex-row justify-center items-center"
-    @click="onLogoClick"
+    @click="useTabStore().setActiveTab( Tab.Main )"
     >
         <svg width="197" height="52" viewBox="0 0 197 52" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M15.1338 31.572V22.9044H32.2625V31.572H15.1338ZM20.8434 37.4879V23.1108H32.2625V37.4879H20.8434ZM0 37.4879V14.5121H11.4191V37.4879H0ZM0 14.5809C0 11.8293 0.71083 9.37575 2.13249 7.22033C3.55415 5.01905 5.48027 3.2993 7.91085 2.06109C10.3414 0.777005 13.093 0.134964 16.1656 0.134964V8.8025C14.6981 8.8025 13.5287 9.30696 12.6574 10.3159C11.8319 11.3248 11.4191 12.7465 11.4191 14.5809H0ZM0 37.4191H11.4191C11.4191 39.2535 11.8319 40.6752 12.6574 41.6841C13.5287 42.693 14.6981 43.1975 16.1656 43.1975V51.865C13.093 51.865 10.3414 51.2459 7.91085 50.0077C5.48027 48.7236 3.55415 47.0039 2.13249 44.8484C0.71083 42.6472 0 40.1707 0 37.4191ZM22.288 16.9885C22.1504 14.4203 21.5313 12.4254 20.4306 11.0038C19.33 9.53626 17.8854 8.8025 16.0969 8.8025V0.134964C20.8204 0.134964 24.6268 1.4649 27.516 4.12478C30.4052 6.7388 32.0791 10.4305 32.5377 15.2L22.288 16.9885ZM32.2625 37.4191C32.2625 40.1707 31.5517 42.6472 30.13 44.8484C28.7083 47.0039 26.7822 48.7236 24.3517 50.0077C21.9211 51.2459 19.1695 51.865 16.0969 51.865V43.1975C17.5644 43.1975 18.7109 42.693 19.5364 41.6841C20.4077 40.6752 20.8434 39.2535 20.8434 37.4191H32.2625Z" fill="black"/>
@@ -19,11 +19,14 @@
     <div class="w-fit-h-fit rounded-full px-4 py-4 flex flex-row justify-center items-center space-x-4 bg-blue-700">
         <!-- <p class="text-white font-bold">Информация</p> -->
         <button class="w-fit h-fit px-6 py-4 border-2 rounded-full flex flex-row justify-center items-center bg-white hover:bg-orange-100 focus:border-orange-500 focus:text-orange-600"
-        @click="onProductionClick"
+        @click="useTabStore().setActiveTab( Tab.Production )"
         >Производителям</button>
         <button class="w-fit h-fit px-6 py-4 border-2 rounded-full flex flex-row justify-center items-center bg-white hover:bg-orange-100 focus:border-orange-500 focus:text-orange-600"
-        @click="onConsumerClick"
+        @click="useTabStore().setActiveTab( Tab.Consumer )"
         >Потребителям</button>
+        <button class="w-fit h-fit px-6 py-4 border-2 rounded-full flex flex-row justify-center items-center bg-white hover:bg-orange-100 focus:border-orange-500 focus:text-orange-600"
+        @click="useTabStore().setActiveTab( Tab.Info )"
+        >Информация</button>
     </div>
 </div>
 </template>
@@ -32,12 +35,15 @@
 import { Tab, useTabStore } from '@/store/tabStore';
 
 function onLogoClick(){
-    useTabStore().setActiveTab( Tab.Info );
+    useTabStore().setActiveTab( Tab.Main );
 }
 function onProductionClick(){
     useTabStore().setActiveTab( Tab.Production );
 }
 function onConsumerClick(){
     useTabStore().setActiveTab( Tab.Consumer );
+}
+function onInfoClick(){
+    useTabStore().setActiveTab( Tab.Info );
 }
 </script>
