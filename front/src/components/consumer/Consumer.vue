@@ -10,9 +10,9 @@
         </Transition>
 
         <Transition name="fade" mode="out-in">
-            <MarketInfo v-if="MarketStore.state === MarketState.None"/>
-            <Sale v-else-if="MarketStore.state === MarketState.Sale"/>
-            <Buy v-else/>
+        <MarketInfo v-if="MarketStore.state === MarketState.None"/>
+        <Sale v-else-if="MarketStore.state === MarketState.Sale"/>
+        <Buy v-else/>
         </Transition>
     </div>
     <MetaMaskNotFound v-else/>

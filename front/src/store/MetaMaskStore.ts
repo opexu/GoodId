@@ -4,11 +4,12 @@ import { computed, ref } from "vue";
 import { useProductionStore } from "./ProductionStore";
 import type { ICollectionDto, ICollectionParams, ITokenDto } from "@/components/interfaces/common";
 import { BigNumber, ethers } from 'ethers'
-import { type IdNft, IdNft__factory, type IdNftFactory, IdNftFactory__factory, type IdNftMarket, IdNftMarket__factory } from '@/typechain-types';
+import { type IdNft, IdNft__factory, type IdNftFactory, IdNftFactory__factory, type IdNftMarket, IdNftMarket__factory, ERC20__factory } from '@/typechain-types';
 import { API } from "@/back_api/API";
 
 const ID_NFT_FACTORY = '0x6542AF3782Bc1c92Fb5611087ABE3fF169872Dff';
 const ID_NFT_MARKET = '0xE6168c50a4092784eBD19063842aDfb38473F5Ac';
+const ID_PAYABLE_TOKEN = '0x0790c2d13FdC6F453627C39a46F819720D8D856E';
 
 export const useMetaMask = defineStore('MetaMaskStore', () => {
 
@@ -202,8 +203,43 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
         
     }
 
-    async function onCreateSaleOrder( buyerAddress: string, tokenId: number, price: number ){
+    const orderId = ref('');
+    async function onCreateSaleOrder( _contractAddress: string, buyerAddress: string, tokenId: number, price: number ){
+        try{
+            const signer = await siberium.getSigner();
+            const idNFTMarket = IdNftMarket__factory.connect( ID_NFT_MARKET, signer );
+            const token = ERC20__factory.connect( ID_PAYABLE_TOKEN, signer );
 
+            // количество комиссии, за выставление продажного ордера
+            const opts = { value: ethers.utils.parseEther( '0.1' ) }
+            
+            const nft = IdNft__factory.connect( _contractAddress, signer )
+            await nft.connect( signer ).approve( idNFTMarket.address, tokenId )
+            await token.connect( signer ).approve( idNFTMarket.address, ethers.utils.parseEther(( ( price + 0.1 ) * 2 ).toString()) )
+
+            const tx = await idNFTMarket.connect( signer ).createSaleOrder(
+            {
+                nftAddress: _contractAddress,
+                tokenId: tokenId,
+                price: ethers.utils.parseEther( price.toString() ),
+                buyer: buyerAddress,
+            }, opts );
+            console.log('tx: ', tx)
+            const orderReceipt = await tx.wait();
+            console.log('orderReceipt', orderReceipt)
+            if( orderReceipt.events === undefined || orderReceipt.events.length === 0 ) throw new Error('Ошибка в Receipt');
+            const events = orderReceipt.events.filter( e => e.event === 'CreatedSaleOrder' );
+            if( events.length === 0 ) throw new Error('Ошибка в Events');
+            if( events[0].args === undefined ) throw new Error('Ошибка в args');
+            orderId.value = events[0].args.id.toString()
+        }catch(e){
+            console.log('error', e)
+            throw null;
+        }
+    }
+
+    async function onConfirmSale( orderId: number ) {
+        
     }
 
     return { 
@@ -221,5 +257,6 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
         onCreateCollection,
         onCreateToken,
         onCreateSaleOrder,
+        onConfirmSale
     }
 })
