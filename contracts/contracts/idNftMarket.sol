@@ -53,13 +53,14 @@ contract idNftMarket {
 
     mapping(uint256 => saleOrder) private saleOrders;
 
+    function getOrderPrice(uint256 orderId) public view returns (uint256) {
+        return saleOrders[orderId].price;
+    }
+
     function createSaleOrder(
         saleOrderParams calldata params
     ) public payable returns (uint256) {
-        require(
-            msg.value == fixedPlatformFee,
-            "platform fee is 0.1"
-        );
+        require(msg.value == fixedPlatformFee, "platform fee is 0.1");
         IERC721 idNftContract = IERC721(params.nftAddress);
 
         require(

@@ -1103,8 +1103,8 @@
       ]
     },
     "C:\\Users\\Cobra8\\Documents\\GoodId\\contracts\\contracts\\idNftMarket.sol": {
-      "lastModificationDate": 1689851144999,
-      "contentHash": "46af58a049cf780dc3b3092020130056",
+      "lastModificationDate": 1689975908664,
+      "contentHash": "6e307af6614cb6cf84f7590e1e911fcd",
       "sourceName": "contracts/idNftMarket.sol",
       "solcConfig": {
         "version": "0.8.18",
