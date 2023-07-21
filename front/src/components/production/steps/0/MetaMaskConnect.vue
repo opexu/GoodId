@@ -23,7 +23,11 @@ import MetaMaskLogo from '@/components/misc/MetaMaskLogo.vue';
 import First from '@/components/misc/First.vue';
 import { useMetaMask } from '@/store/MetaMaskStore';
 
-function onConnectMetamask(){
-    useMetaMask().connect();
+const emit = defineEmits([ 'metamask-connected' ])
+async function onConnectMetamask(){
+    const result = await useMetaMask().connect();
+    if( result ){
+        emit('metamask-connected')
+    }
 }
 </script>

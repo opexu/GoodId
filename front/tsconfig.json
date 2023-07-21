@@ -1,6 +1,7 @@
 {
     "extends": "@vue/tsconfig/tsconfig.json",
     "include": [
+        "env.d.ts",
         "src/**/*",
         "src/**/*.vue",
         "src/*.vue",
@@ -12,6 +13,7 @@
         "node_modules",
     ],
     "compilerOptions": {
+        "strict": true,
         "sourceMap": true,
         "noImplicitReturns": true,
         "isolatedModules": true,

@@ -2,12 +2,12 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export enum Tab {
-    Info, Consumer, Production
+    Main, Consumer, Production, Info
 }
 
 export const useTabStore = defineStore('TabStore', () => {
 
-    const activeTab = ref( Tab.Info )
+    const activeTab = ref( Tab.Main )
     
     function setActiveTab( newTab: Tab ){
         if( activeTab.value === newTab ) return;
