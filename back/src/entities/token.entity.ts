@@ -7,8 +7,8 @@ export class TokenEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ type: 'integer', nullable: true })
-    tokenId: number;
+    @Column({ type: 'text', nullable: true })
+    tokenId: string;
 
     @Column({ type: 'varchar', nullable: false })
     name: string;
@@ -41,7 +41,7 @@ export class TokenEntity extends BaseEntity {
 }
 
 export class TokenDto {
-    public tokenId?: number;
+    public tokenId?: string;
     public description?: string;
     public properties?: {[key:string]:string};
     constructor(

@@ -164,7 +164,7 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
 
     const tokenUri = ref('');
     async function onCreateToken( params: ICollectionParams ){
-
+        console.log('params', params)
         const tokenDto: ITokenDto = {
             name: params.name,
             contractAddress: contractAddress.value,
@@ -197,7 +197,7 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
             if( nftReceipt.events === undefined || nftReceipt.events.length === 0 ) throw new Error('Ошибка в Receipt');
             const properties = await nft.connect( signer ).tokenURI( nftReceipt.events[0].args.tokenId )
             console.log('properties', properties)
-            tokenEntity.tokenId = nftReceipt.events[0].args.tokenId;
+            tokenEntity.tokenId = nftReceipt.events[0].args.tokenId.toString();
             const response2: any = await fetch( API.TOKEN, {
                 method: 'POST',
                 body: JSON.stringify( tokenEntity ),
