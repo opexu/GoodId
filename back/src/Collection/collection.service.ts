@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CollectionDto, CollectionEntity } from 'src/entities/collection.entity';
-import { Repository } from "typeorm";
+import { Repository, Not, IsNull } from "typeorm";
 
 @Injectable()
 export class CollectionService {
@@ -13,8 +13,10 @@ export class CollectionService {
     
     async getCollectionArrByOwner( owner: string ) {
         const collectionArr = await this._collectionRepository.find({
-            select: [ 'id', 'name', 'description' ],
-            where: { ownerAddress: owner }
+            where: { 
+                ownerAddress: owner, 
+                contractAddress: Not(IsNull()) 
+            }
         })
         return collectionArr;
     }

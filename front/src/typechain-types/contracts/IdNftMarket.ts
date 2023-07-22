@@ -54,6 +54,7 @@ export interface IdNftMarketInterface extends utils.Interface {
     "cancelSaleOrder(uint256)": FunctionFragment;
     "createSaleOrder((address,uint256,uint256,address))": FunctionFragment;
     "fixedPlatformFee()": FunctionFragment;
+    "getOrderPrice(uint256)": FunctionFragment;
   };
 
   getFunction(
@@ -62,6 +63,7 @@ export interface IdNftMarketInterface extends utils.Interface {
       | "cancelSaleOrder"
       | "createSaleOrder"
       | "fixedPlatformFee"
+      | "getOrderPrice"
   ): FunctionFragment;
 
   encodeFunctionData(functionFragment: "buy", values: [BigNumberish]): string;
@@ -77,6 +79,10 @@ export interface IdNftMarketInterface extends utils.Interface {
     functionFragment: "fixedPlatformFee",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "getOrderPrice",
+    values: [BigNumberish]
+  ): string;
 
   decodeFunctionResult(functionFragment: "buy", data: BytesLike): Result;
   decodeFunctionResult(
@@ -89,6 +95,10 @@ export interface IdNftMarketInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "fixedPlatformFee",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getOrderPrice",
     data: BytesLike
   ): Result;
 
@@ -192,6 +202,11 @@ export interface IdNftMarket extends BaseContract {
     ): Promise<ContractTransaction>;
 
     fixedPlatformFee(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getOrderPrice(
+      orderId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
   };
 
   buy(
@@ -211,6 +226,11 @@ export interface IdNftMarket extends BaseContract {
 
   fixedPlatformFee(overrides?: CallOverrides): Promise<BigNumber>;
 
+  getOrderPrice(
+    orderId: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   callStatic: {
     buy(orderId: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
@@ -225,6 +245,11 @@ export interface IdNftMarket extends BaseContract {
     ): Promise<BigNumber>;
 
     fixedPlatformFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getOrderPrice(
+      orderId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
   };
 
   filters: {
@@ -295,6 +320,11 @@ export interface IdNftMarket extends BaseContract {
     ): Promise<BigNumber>;
 
     fixedPlatformFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getOrderPrice(
+      orderId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -314,5 +344,10 @@ export interface IdNftMarket extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     fixedPlatformFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getOrderPrice(
+      orderId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
   };
 }

@@ -1,14 +1,13 @@
 import { defineStore } from "pinia";
 import { MetaMaskSDK } from '@metamask/sdk';
 import { computed, ref } from "vue";
-import { useProductionStore } from "./ProductionStore";
 import type { ICollectionDto, ICollectionParams, ITokenDto } from "@/components/interfaces/common";
 import { BigNumber, ethers } from 'ethers'
 import { type IdNft, IdNft__factory, type IdNftFactory, IdNftFactory__factory, type IdNftMarket, IdNftMarket__factory, ERC20__factory } from '@/typechain-types';
 import { API } from "@/back_api/API";
 
 const ID_NFT_FACTORY = '0x6542AF3782Bc1c92Fb5611087ABE3fF169872Dff';
-const ID_NFT_MARKET = '0xE6168c50a4092784eBD19063842aDfb38473F5Ac';
+const ID_NFT_MARKET = '0x4e2177e1dC5F49F441aBff77880c0247279d2c1a';
 const ID_PAYABLE_TOKEN = '0x0790c2d13FdC6F453627C39a46F819720D8D856E';
 
 export const useMetaMask = defineStore('MetaMaskStore', () => {
@@ -26,7 +25,7 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
 
 
     async function init(){
-        siberium = new ethers.providers.Web3Provider(window.ethereum, "any");
+        siberium = new ethers.providers.Web3Provider( window.ethereum, "any" );
         console.log('siberium', siberium)
         console.log(siberium.provider.isMetaMask)
         if( !siberium ){
@@ -207,17 +206,17 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
     async function onCreateSaleOrder( _contractAddress: string, buyerAddress: string, tokenId: number, price: number ){
         try{
             const signer = await siberium.getSigner();
-            const idNFTMarket = IdNftMarket__factory.connect( ID_NFT_MARKET, signer );
+            const market = IdNftMarket__factory.connect( ID_NFT_MARKET, signer );
             const token = ERC20__factory.connect( ID_PAYABLE_TOKEN, signer );
 
             // количество комиссии, за выставление продажного ордера
             const opts = { value: ethers.utils.parseEther( '0.1' ) }
             
             const nft = IdNft__factory.connect( _contractAddress, signer )
-            await nft.connect( signer ).approve( idNFTMarket.address, tokenId )
-            await token.connect( signer ).approve( idNFTMarket.address, ethers.utils.parseEther(( ( price + 0.1 ) * 2 ).toString()) )
+            await nft.connect( signer ).approve( market.address, tokenId )
+            await token.connect( signer ).approve( market.address, ethers.utils.parseEther(( ( price + 0.1 ) * 2 ).toString()) )
 
-            const tx = await idNFTMarket.connect( signer ).createSaleOrder(
+            const tx = await market.connect( signer ).createSaleOrder(
             {
                 nftAddress: _contractAddress,
                 tokenId: tokenId,
@@ -232,6 +231,7 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
             if( events.length === 0 ) throw new Error('Ошибка в Events');
             if( events[0].args === undefined ) throw new Error('Ошибка в args');
             orderId.value = events[0].args.id.toString()
+            console.log('orderId.value', orderId.value)
         }catch(e){
             console.log('error', e)
             throw null;
@@ -239,7 +239,32 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
     }
 
     async function onConfirmSale( orderId: number ) {
-        
+        console.log('orderId', orderId)
+        console.log('typeof orderId', typeof orderId)
+        try{
+            const signer = await siberium.getSigner();
+            const market = IdNftMarket__factory.connect( ID_NFT_MARKET, signer );
+            const token = ERC20__factory.connect( ID_PAYABLE_TOKEN, signer );
+
+            const price = await market.connect( signer ).getOrderPrice( BigNumber.from( orderId ))
+            console.log('price', price)
+            await token.connect( signer ).approve( market.address, price.mul( 2 ) )
+            console.log('token approve ok')
+            // количество комиссии, за выставление продажного ордера
+            const opts = { value: price }
+            const tx = await market.connect( signer ).buy( BigNumber.from( orderId ), opts )
+            console.log('tx: ', tx)
+            const buyReceipt = await tx.wait();
+            console.log('buyReceipt', buyReceipt)
+            if( buyReceipt.events === undefined || buyReceipt.events.length === 0 ) throw new Error('Ошибка в Receipt');
+            const events = buyReceipt.events.filter( e => e.event === 'BoughtItem' );
+            if( events.length === 0 ) throw new Error('Ошибка в Events');
+            if( events[0].args === undefined ) throw new Error('Ошибка в args');
+            console.log('Поздравляем с успешной покупкой!!!')
+        }catch(e){
+            console.log('error', e)
+            throw null;
+        }
     }
 
     return { 
