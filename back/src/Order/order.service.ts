@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { OrderDto, OrderEntity } from 'src/entities/order.entity';
 import { Repository } from "typeorm";
 
+const ID_NFT_MARKET = '0x4e2177e1dC5F49F441aBff77880c0247279d2c1a';
+
 @Injectable()
 export class OrderService {
     
@@ -19,27 +21,27 @@ export class OrderService {
     }
 
     async getOrderArrByBuyer( buyer: string ){
-        const orderArr = await this._orderRepository.find({
-            where: { buyerAddress: buyer }
-        })
-        return orderArr;
+        try{
+            const orderArr = await this._orderRepository
+                .query(`
+                    select * from order_entity oe
+                    inner join token_entity te on ( te."tokenId" = oe."tokenId" and te."contractAddress" = oe."contractAddress" )
+                    where oe."buyerAddress" = '${buyer}' and te."ownerAddress" = '${ID_NFT_MARKET}' and oe.status = 'ACTIVE_ORDER'
+                `)
+            return orderArr;
+        }catch(e){
+            console.error('Ошибка получения информации о токене из ордера')
+            return [];
+        }
+        
+        
     }
 
-    async getOrderByOwner( owner: string, tokenId: string ){
-        const order = await this._orderRepository.findOne({
-            where: {
-                ownerAddress: owner,
-                tokenId: tokenId
-            }
-        })
-        return order;
-    }
-
-    async getOrderByBuyer( buyer: string, tokenId: string ){
+    async getOrderByBuyer( buyer: string, orderId: string ){
         const order = await this._orderRepository.findOne({
             where: {
                 buyerAddress: buyer,
-                tokenId: tokenId
+                orderId: orderId
             }
         })
         return order;

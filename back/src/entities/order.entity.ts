@@ -41,6 +41,7 @@ export class OrderEntity extends BaseEntity {
 export class OrderDto {
     constructor(
         public tokenId: string,
+        public orderId: string,
         public contractAddress: string,
         public buyerAddress: string,
         public ownerAddress: string,

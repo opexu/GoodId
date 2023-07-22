@@ -1,5 +1,5 @@
 <template>
-<button class="w-full h-fit px-8 py-4 border rounded-md flex flex-row justify-center items-center space-x-8 hover:bg-orange-100"
+<button class="w-full h-fit px-8 py-2 border rounded-md flex flex-row justify-center items-center space-x-8 hover:bg-orange-100"
 @click="$emit('exist-collection-click')"
 >
     <p class="w-fit h-fit p-8 font-bold text-black text-3xl">{{ id }}</p>

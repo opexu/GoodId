@@ -12,6 +12,7 @@
         <Transition name="fade" mode="out-in">
         <component :is="stepComponents[ProductionStore.step]"
         @metamask-connected="onMetaMaskConnected"
+        @collection-selected="onCollectionSelected"
         v-if="state === State.OK"
         />
         <MetaMaskWait
@@ -35,7 +36,6 @@ import MetaMaskConnect from '@/components/production/steps/0/MetaMaskConnect.vue
 import SetCollection from '@/components/production/steps/1/SetCollection.vue';
 import NewCollection from '@/components/production/steps/2/NewCollection.vue';
 
-import { onMounted, ref, toRef } from 'vue';
 import { useMetaMask } from '@/store/MetaMaskStore';
 import MetaMaskNotFound from '@/components/metamask/MetaMaskNotFound.vue';
 import { useProductionStore } from '@/store/ProductionStore';
@@ -48,6 +48,7 @@ import ShowQR from './steps/4/ShowQR.vue';
 import { useMessageStore } from '@/store/MessageStore';
 import NewToken from './steps/5/NewToken.vue';
 import MetaMaskSuccessfull from './steps/6/MetaMaskSuccessfull.vue';
+import type { ICollectionItem } from '../interfaces/common';
 
 const { state } = storeToRefs( useState() )
 const ProductionStore = useProductionStore();
@@ -55,8 +56,8 @@ const MetaMaskStore = useMetaMask();
 const { message } = storeToRefs( useMessageStore() );
 
 const stepComponents = [
-    MetaMaskConnect, 
-    SetCollection, 
+    MetaMaskConnect,
+    SetCollection,
     NewCollection,
     ExistCollection,
     ShowQR,
@@ -66,6 +67,10 @@ const stepComponents = [
 
 function onMetaMaskConnected(){
     useProductionStore().next();
+}
+
+function onCollectionSelected( collection: ICollectionItem ){
+    useProductionStore().set( 5 );
 }
 </script>
 

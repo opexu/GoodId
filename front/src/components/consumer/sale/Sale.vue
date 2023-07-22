@@ -1,6 +1,6 @@
 <template>
 <div class="w-full h-fit">
-    <SaleCreate
+    <SaleOrder
     v-if="state === State.OK"
     />
     <MetaMaskWait
@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import SaleCreate from './SaleCreate.vue';
+import SaleOrder from './SaleOrder.vue';
 import { storeToRefs } from 'pinia';
 import { State, useState } from '@/store/StateStore';
 import MetaMaskWait from '@/components/metamask/MetaMaskWait.vue';

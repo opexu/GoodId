@@ -20,18 +20,10 @@ import CollectionItem from '@/components/production/steps/3/CollectionItem.vue';
 import Third from '@/components/misc/Third.vue';
 import { onMounted, ref } from 'vue';
 import { useMetaMask } from '@/store/MetaMaskStore';
-import { useProductionStore } from '@/store/ProductionStore';
 import { API } from '@/back_api/API';
-import type { IObjectIterable } from '@/components/interfaces/common';
+import type { ICollectionItem } from '@/components/interfaces/common';
 
-interface ICollectionItem {
-    id: number;
-    name: string;
-    description: string;
-    properties: IObjectIterable;
-    contractAddress: string;
-}
-
+const emit = defineEmits([ 'collection-selected' ])
 const existCollectionArr = ref<ICollectionItem[]>([]);
 onMounted(async () => {
     try{
@@ -55,6 +47,6 @@ function selectCollection( id: number ){
     }
     console.log('collection:', collection )
     MetaMaskStore.SetContractAddress( collection.contractAddress );
-    useProductionStore().set(5)
+    emit('collection-selected', collection)
 }
 </script>

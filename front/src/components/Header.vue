@@ -33,17 +33,4 @@
 
 <script setup lang="ts">
 import { Tab, useTabStore } from '@/store/tabStore';
-
-function onLogoClick(){
-    useTabStore().setActiveTab( Tab.Main );
-}
-function onProductionClick(){
-    useTabStore().setActiveTab( Tab.Production );
-}
-function onConsumerClick(){
-    useTabStore().setActiveTab( Tab.Consumer );
-}
-function onInfoClick(){
-    useTabStore().setActiveTab( Tab.Info );
-}
 </script>

@@ -15,6 +15,18 @@ export class TokenController {
         return this._tokenService.getTokenArrByOwner( owner );
     }
 
+    @Get('contract')
+    async getCollectionTokenArr( @Query('owner') owner: string, @Query('contract') contract: string ){
+        if( typeof owner !== 'string' || typeof contract !== 'string' || !contract.match(/^0x[a-fA-F0-9]{40}$/g) ) return [];
+        return this._tokenService.getCollectionTokenArr( owner, contract );
+    }
+
+    @Get('one')
+    async getToken( @Query('owner') owner: string, @Query('contract') contract: string, @Query('tokenId') tokenId: string ){
+        if( typeof owner !== 'string' || typeof contract !== 'string' || !contract.match(/^0x[a-fA-F0-9]{40}$/g) || typeof tokenId !== 'string') return null;
+        return this._tokenService.getToken( owner, contract, tokenId );
+    }
+
     @Get('properties')
     async getProperties( @Query('id') id: string, @Res() res: Response ){
         const _id = parseInt( id );

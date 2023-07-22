@@ -12,11 +12,32 @@ export class TokenService {
     ){}
     
     async getTokenArrByOwner( owner: string ) {
-        const collectionArr = await this._tokenRepository.find({
+        const tokenArr = await this._tokenRepository.find({
             select: [ 'id', 'name', 'description' ],
             where: { ownerAddress: owner }
         })
-        return collectionArr;
+        return tokenArr;
+    }
+
+    async getCollectionTokenArr( owner: string, contract: string ){
+        const tokenArr = await this._tokenRepository.find({
+            where: { 
+                ownerAddress: owner,
+                contractAddress: contract,
+            }
+        })
+        return tokenArr;
+    }
+
+    async getToken( owner: string, contract: string, tokenId: string ){
+        const token = await this._tokenRepository.findOne({
+            where: { 
+                ownerAddress: owner,
+                contractAddress: contract,
+                tokenId: tokenId,
+            }
+        })
+        return token;
     }
 
     async getProperties( id: number ){

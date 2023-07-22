@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { MetaMaskSDK } from '@metamask/sdk';
 import { computed, ref } from "vue";
-import type { ICollectionDto, ICollectionParams, ITokenDto } from "@/components/interfaces/common";
+import type { ICollectionDto, ICollectionParams, IOrderDto, ITokenDto } from "@/components/interfaces/common";
 import { BigNumber, ethers } from 'ethers'
 import { type IdNft, IdNft__factory, type IdNftFactory, IdNftFactory__factory, type IdNftMarket, IdNftMarket__factory, ERC20__factory } from '@/typechain-types';
 import { API } from "@/back_api/API";
@@ -81,7 +81,7 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
             console.log('txHash: ', txHash)
             const receipt = await txHash.wait();
             console.log('receipt: ', receipt)
-            SetContractAddress( receipt.events[0].address );
+            SetContractAddress( receipt.events[0].address.toLowerCase() );
             console.log('contractAddress', contractAddress.value)
 
             const nft = IdNft__factory.connect( contractAddress.value, signer )
@@ -134,7 +134,7 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
             console.log('txHash: ', txHash)
             const receipt = await txHash.wait();
             if( receipt.events === undefined || receipt.events.length === 0 ) throw new Error('Ошибка в Receipt');
-            SetContractAddress( receipt.events[0].address )
+            SetContractAddress( receipt.events[0].address.toLowerCase() )
             collectionEntity.contractAddress = contractAddress.value;
             const response2: any = await fetch( API.COLLECTION, {
                 method: 'POST',
@@ -202,8 +202,13 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
         
     }
 
+    const tokenId = ref(-1);
+    function SetTokenId( id: number ){
+        tokenId.value = id;
+    }
+
     const orderId = ref('');
-    async function onCreateSaleOrder( _contractAddress: string, buyerAddress: string, tokenId: number, price: number ){
+    async function onCreateSaleOrder( buyerAddress: string, price: number ){
         try{
             const signer = await siberium.getSigner();
             const market = IdNftMarket__factory.connect( ID_NFT_MARKET, signer );
@@ -212,16 +217,16 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
             // количество комиссии, за выставление продажного ордера
             const opts = { value: ethers.utils.parseEther( '0.1' ) }
             
-            const nft = IdNft__factory.connect( _contractAddress, signer )
-            await nft.connect( signer ).approve( market.address, tokenId )
+            const nft = IdNft__factory.connect( contractAddress.value, signer )
+            await nft.connect( signer ).approve( market.address, tokenId.value )
             await token.connect( signer ).approve( market.address, ethers.utils.parseEther(( ( price + 0.1 ) * 2 ).toString()) )
 
             const tx = await market.connect( signer ).createSaleOrder(
             {
-                nftAddress: _contractAddress,
-                tokenId: tokenId,
+                nftAddress: contractAddress.value,
+                tokenId: tokenId.value,
                 price: ethers.utils.parseEther( price.toString() ),
-                buyer: buyerAddress,
+                buyer: buyerAddress.toLowerCase(),
             }, opts );
             console.log('tx: ', tx)
             const orderReceipt = await tx.wait();
@@ -232,6 +237,37 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
             if( events[0].args === undefined ) throw new Error('Ошибка в args');
             orderId.value = events[0].args.id.toString()
             console.log('orderId.value', orderId.value)
+            const orderDto: IOrderDto = {
+                tokenId: tokenId.value.toString(),
+                orderId: orderId.value,
+                contractAddress: contractAddress.value,
+                ownerAddress: accounts.value[0],
+                buyerAddress: buyerAddress.toLowerCase(),
+                status: "ACTIVE_ORDER"
+            }
+
+            const headers = new Headers();
+            headers.append('Content-Type', 'application/json');
+            const response: any = await fetch( API.ORDER, {
+                method: 'POST',
+                body: JSON.stringify( orderDto ),
+                headers: headers,
+            })
+            const orderEntity = await response.json();
+            console.log('orderEntity', orderEntity)
+
+            const response2: any = await fetch( API.TOKEN + '/one' + '?owner=' + accounts.value[0] + '&contract=' + contractAddress.value + '&tokenId=' + tokenId.value, {
+                method: 'GET'
+            });
+            const tokenEntity = await response2.json();
+            tokenEntity.ownerAddress = ID_NFT_MARKET;
+            const response3: any = await fetch( API.TOKEN, {
+                method: 'POST',
+                body: JSON.stringify( tokenEntity ),
+                headers: headers
+            })
+            const updateTokenEntity = await response3.json();
+            console.log('updateTokenEntity', updateTokenEntity)
         }catch(e){
             console.log('error', e)
             throw null;
@@ -261,6 +297,33 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
             if( events.length === 0 ) throw new Error('Ошибка в Events');
             if( events[0].args === undefined ) throw new Error('Ошибка в args');
             console.log('Поздравляем с успешной покупкой!!!')
+
+            const response2: any = await fetch( API.TOKEN + '/one' + '?owner=' + ID_NFT_MARKET + '&contract=' + contractAddress.value + '&tokenId=' + tokenId.value, {
+                method: 'GET'
+            });
+            const tokenEntity = await response2.json();
+            console.log('tokenEntity', tokenEntity)
+            tokenEntity.ownerAddress = accounts.value[0];
+            const headers = new Headers();
+            headers.append('Content-Type', 'application/json');
+            const response3: any = await fetch( API.TOKEN, {
+                method: 'POST',
+                body: JSON.stringify( tokenEntity ),
+                headers: headers
+            })
+            const updateTokenEntity = await response3.json();
+            console.log('updateTokenEntity', updateTokenEntity)
+
+            const response4: any = await fetch( API.ORDER + '/one' + '?buyer=' + accounts.value[0] + '&orderId=' + orderId )
+            const orderEntity = await response4.json();
+            orderEntity.status = "INACTIVE_ORDER";
+            const response5: any = await fetch( API.ORDER, {
+                method: 'POST',
+                body: JSON.stringify( orderEntity ),
+                headers: headers
+            })
+            const updateOrderEntity = await response5.json();
+            console.log('updateOrderEntity', updateOrderEntity)
         }catch(e){
             console.log('error', e)
             throw null;
@@ -276,10 +339,12 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
         contractAddress,
         contractUri,
         tokenUri,
+        orderId,
         connect, 
         onApplyCollection, 
         SetContractAddress,
         onCreateCollection,
+        SetTokenId,
         onCreateToken,
         onCreateSaleOrder,
         onConfirmSale

@@ -24,11 +24,12 @@ import { useMessageStore } from '@/store/MessageStore';
 import { useState, State } from '@/store/StateStore';
 
 async function onCreateToken( params: ICollectionParams ){
-    useMessageStore().setMessage({ title: 'Продолжается процесс создания токена', message: 'Не закрывайте страницу, дождитесь завершения транзакции'})
     try{
+        useMessageStore().setMessage({ title: 'Продолжается процесс создания токена', message: 'Не закрывайте страницу, дождитесь завершения транзакции'})
         useState().setState( State.WAIT );
         await useMetaMask().onCreateToken( params )
         useState().setState( State.OK );
+        useMessageStore().setMessage({ title: 'Продукт успешно создан', message: 'Обновите страницу для создания новой транзакции'})
         useProductionStore().set(6)
     }catch(e){
         useMessageStore().setMessage({ title: 'Ошибка создания токена', message: 'Обновите страницу и попробуйте еще раз'})

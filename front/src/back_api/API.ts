@@ -1,6 +1,7 @@
 export const API = {
     COLLECTION: HOST() + '/collection',
-    TOKEN: HOST() + '/token'
+    TOKEN: HOST() + '/token',
+    ORDER: HOST() + '/order',
 }
 
 function HOST(){

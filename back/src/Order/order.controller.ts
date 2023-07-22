@@ -9,32 +9,23 @@ export class OrderController {
         private readonly _orderService: OrderService
     ){}
 
-    @Get()
+    @Get('owner')
     async getOrderArrByOwner( @Query('owner') owner: string ) {
         if( typeof owner !== 'string' ) return [];
         return this._orderService.getOrderArrByOwner( owner );
     }
 
-    @Get()
+    @Get('buyer')
     async getOrderArrByBuyer( @Query('buyer') buyer: string ) {
         if( typeof buyer !== 'string' ) return [];
         return this._orderService.getOrderArrByBuyer( buyer );
     }
 
-    @Get()
-    async getOrderByOwner( @Query('owner') owner: string, @Query('tokenId') tokenId: string ) {
-        if( typeof owner !== 'string' || typeof tokenId !== 'string' ) return null;
-        const _tokenId = parseInt( tokenId );
-        if( isNaN( _tokenId ) ) return null;
-        return this._orderService.getOrderByOwner( owner, tokenId );
-    }
-
-    @Get()
-    async getOrderByBuyer( @Query('buyer') buyer: string, @Query('tokenId') tokenId: string ) {
-        if( typeof buyer !== 'string' || typeof tokenId !== 'string' ) return null;
-        const _tokenId = parseInt( tokenId );
-        if( isNaN( _tokenId ) ) return null;
-        return this._orderService.getOrderByOwner( buyer, tokenId );
+    @Get('one')
+    async getOrderByBuyer( @Query('buyer') buyer: string, @Query('orderId') orderId: string ) {
+        if( typeof buyer !== 'string' || typeof orderId !== 'string' ) return null;
+        if( isNaN( parseInt( orderId ) ) ) return null;
+        return this._orderService.getOrderByBuyer( buyer, orderId );
     }
 
     @Post()
