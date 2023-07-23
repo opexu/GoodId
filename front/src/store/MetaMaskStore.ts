@@ -25,6 +25,10 @@ export const useMetaMask = defineStore('MetaMaskStore', () => {
 
 
     async function init(){
+        if( window.ethereum === undefined ){
+            siberium = undefined;
+            return;
+        }
         siberium = new ethers.providers.Web3Provider( window.ethereum, "any" );
         console.log('siberium', siberium)
         console.log(siberium.provider.isMetaMask)
