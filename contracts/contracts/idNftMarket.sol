@@ -94,7 +94,7 @@ contract idNftMarket {
         saleOrder memory order = saleOrders[orderId];
 
         require(order.buyer == msg.sender, "incorrect buyer");
-        require(order.price < msg.value, "low balance");
+        require(order.price <= msg.value, "low balance");
         address nftAddress = order.nftAddress;
         uint256 tokenId = order.tokenId;
         address seller = order.seller;
